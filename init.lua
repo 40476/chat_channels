@@ -30,7 +30,7 @@ end
 
 font_styles.upsidedown = function(text)
   local map = {
-    a = "ɐ", b = "q", c = "ɔ", d = "p", e = "ǝ", f = "ɟ", g = "ƃ"
+    a = "ɐ", b = "q", c = "ɔ", d = "p", e = "ǝ", f = "ɟ", g = "ƃ",
     h = "ɥ",i = "ᴉ", j = "ɾ", k = "ʞ", l = "ʃ", m = "ɯ", n = "u",
     o = "o", p = "d", q = "b", r = "ɹ", s = "s", t = "ʇ", u = "n",
     v = "ʌ", w = "ʍ", x = "x", y = "ʎ", z = "z", [" "] = " "
@@ -38,8 +38,8 @@ font_styles.upsidedown = function(text)
   return text:lower():gsub(".", function(c) return map[c] or c end):reverse()
 end
 
-local font_styles.owo = function(input)
-      -- Check for nil or non-string input
+font_styles.owo = function(input)
+    -- Check for nil or non-string input
     if type(input) ~= "string" then
         return "nuuu that's not text! >w<"
     end
@@ -77,7 +77,7 @@ local font_styles.owo = function(input)
     return output
 end
 
-local font_styles.catgirl = function(input)
+font_styles.catgirl = function(input)
     -- Input validation
     if type(input) ~= "string" then
         return "*tilts head* Nya? That's not text, baka! >.<"
@@ -256,15 +256,25 @@ local function send_to_active_channel(sender, message, channel, is_matrix)
 end
 
 minetest.register_on_chat_message(function(name, message)
+  local active_channel = get_player_data(name).active or "global"
+
+  -- Format the message once, for both in-game and Matrix use
+  local formatted_message = send_to_active_channel(name, message, nil, true)
+
+  -- Send to in-game players (non-matrix)
   send_to_active_channel(name, message, nil, false)
 
+  -- Send to Matrix if available
+  if matrix_bridge and matrix_bridge.send_raw and formatted_message and active_channel == "global" then
+    matrix_bridge.send_raw(formatted_message)
+  end
+
+  -- Allow challenge_respond if present
   if type(challenge_respond) == "function" then
     challenge_respond(name, message)
   end
-  if MatrixChat and MatrixChat.send then
-     MatrixChat:send(send_to_active_channel(name, message, nil,true))
-  end
 
+  -- Prevent default handling
   return true
 end)
 
