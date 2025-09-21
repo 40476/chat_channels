@@ -10,101 +10,119 @@ local font_styles = {}
 
 font_styles.superscript = function(text)
   local map = {
-    a = "ᵃ",
-    b = "ᵇ",
-    c = "ᶜ",
-    d = "ᵈ",
-    e = "ᵉ",
-    f = "ᶠ",
-    g = "ᵍ",
-    h = "ʰ",
-    i = "ᶦ",
-    j = "ʲ",
-    k = "ᵏ",
-    l = "ˡ",
-    m = "ᵐ",
-    n = "ⁿ",
-    o = "ᵒ",
-    p = "ᵖ",
-    q = "q",
-    r = "ʳ",
-    s = "ˢ",
-    t = "ᵗ",
-    u = "ᵘ",
-    v = "ᵛ",
-    w = "ʷ",
-    x = "ˣ",
-    y = "ʸ",
-    z = "ᶻ",
-    [" "] = " "
+    a = "ᵃ", b = "ᵇ", c = "ᶜ", d = "ᵈ", e = "ᵉ", f = "ᶠ", g = "ᵍ",
+    h = "ʰ", i = "ᶦ", j = "ʲ", k = "ᵏ", l = "ˡ", m = "ᵐ", n = "ⁿ",
+    o = "ᵒ", p = "ᵖ", q = "q", r = "ʳ", s = "ˢ", t = "ᵗ", u = "ᵘ",
+    v = "ᵛ", w = "ʷ", x = "ˣ", y = "ʸ", z = "ᶻ", [" "] = " "
   }
   return text:lower():gsub(".", function(c) return map[c] or c end)
 end
 
 font_styles.smallcaps = function(text)
   local map = {
-    a = "ᴀ",
-    b = "ʙ",
-    c = "ᴄ",
-    d = "ᴅ",
-    e = "ᴇ",
-    f = "ғ",
-    g = "ɢ",
-    h = "ʜ",
-    i = "ɪ",
-    j = "ᴊ",
-    k = "ᴋ",
-    l = "ʟ",
-    m = "ᴍ",
-    n = "ɴ",
-    o = "ᴏ",
-    p = "ᴘ",
-    q = "ǫ",
-    r = "ʀ",
-    s = "s",
-    t = "ᴛ",
-    u = "ᴜ",
-    v = "ᴠ",
-    w = "ᴡ",
-    x = "x",
-    y = "ʏ",
-    z = "ᴢ",
-    [" "] = " "
+    a = "ᴀ", b = "ʙ", c = "ᴄ", d = "ᴅ", e = "ᴇ", f = "ғ", g = "ɢ",
+    h = "ʜ", i = "ɪ", j = "ᴊ", k = "ᴋ", l = "ʟ", m = "ᴍ", n = "ɴ",
+    o = "ᴏ", p = "ᴘ", q = "ǫ", r = "ʀ", s = "s", t = "ᴛ", u = "ᴜ",
+    v = "ᴠ", w = "ᴡ", x = "x", y = "ʏ", z = "ᴢ", [" "] = " "
   }
   return text:lower():gsub(".", function(c) return map[c] or c end)
 end
 
 font_styles.upsidedown = function(text)
   local map = {
-    a = "ɐ",
-    b = "q",
-    c = "ɔ",
-    d = "p",
-    e = "ǝ",
-    f = "ɟ",
-    g = "ƃ",
-    h = "ɥ",
-    i = "ᴉ",
-    j = "ɾ",
-    k = "ʞ",
-    l = "ʃ",
-    m = "ɯ",
-    n = "u",
-    o = "o",
-    p = "d",
-    q = "b",
-    r = "ɹ",
-    s = "s",
-    t = "ʇ",
-    u = "n",
-    v = "ʌ",
-    w = "ʍ",
-    x = "x",
-    y = "ʎ",
-    z = "z",
-    [" "] = " "
+    a = "ɐ", b = "q", c = "ɔ", d = "p", e = "ǝ", f = "ɟ", g = "ƃ",
+    h = "ɥ",i = "ᴉ", j = "ɾ", k = "ʞ", l = "ʃ", m = "ɯ", n = "u",
+    o = "o", p = "d", q = "b", r = "ɹ", s = "s", t = "ʇ", u = "n",
+    v = "ʌ", w = "ʍ", x = "x", y = "ʎ", z = "z", [" "] = " "
   }
   return text:lower():gsub(".", function(c) return map[c] or c end):reverse()
+end
+
+font_styles.owo = function(input)
+    -- Check for nil or non-string input
+    if type(input) ~= "string" then
+        return "nuuu that's not text! >w<"
+    end
+
+    local output = input
+
+    -- Basic OwO replacements
+    output = output:gsub("r", "w")
+    output = output:gsub("l", "w")
+    output = output:gsub("R", "W")
+    output = output:gsub("L", "W")
+
+    -- Extra absurd replacements
+    output = output:gsub("ove", "uv")
+    output = output:gsub("the", "da")
+    output = output:gsub("you", "u")
+    output = output:gsub("!", "!!1! >w<")
+    output = output:gsub("?", "?? ;;w;;")
+
+    -- Random stutter for absurdity
+    local words = {}
+    for word in output:gmatch("%S+") do
+        if math.random() < 0.3 then
+            word = word:sub(1, 1) .. "-" .. word
+        end
+        table.insert(words, word)
+    end
+    output = table.concat(words, " ")
+
+    -- Add random OwO faces
+    local faces = { "owo", "UwU", ">w<", "^w^", ";;w;;", "x3", ":3", "@w@" }
+    local face = faces[math.random(#faces)]
+    output = output .. " " .. face .. " " .. face
+
+    return output
+end
+
+font_styles.catgirl = function(input)
+    -- Input validation
+    if type(input) ~= "string" then
+        return "*tilts head* Nya? That's not text, baka! >.<"
+    end
+
+    local output = input
+
+    -- Classic OwO substitutions
+    output = output:gsub("r", "w")
+    output = output:gsub("l", "w")
+    output = output:gsub("R", "W")
+    output = output:gsub("L", "W")
+    output = output:gsub("n", "ny")
+    output = output:gsub("N", "NY")
+    output = output:gsub("na", "nya")
+    output = output:gsub("nyu", "nyu~")
+    output = output:gsub("ove", "uv")
+    output = output:gsub("you", "y-you" .. (" >///<"):rep(math.random(1, 2)))
+
+    -- Add extra stuttering occasionally
+    local words = {}
+    for word in output:gmatch("%S+") do
+        if math.random() < 0.3 then
+            word = word:sub(1, 1) .. "-" .. word
+        end
+        table.insert(words, word)
+    end
+    output = table.concat(words, " ")
+
+    -- Add suffixes randomly for cuteness overload
+    local suffixes = { "nya", "nya~", "meow", "mew~", "purr~", "~" }
+    local suffix = suffixes[math.random(#suffixes)]
+    output = output .. " " .. suffix .. " " .. ("^w^"):rep(math.random(1, 3))
+
+    -- Random catgirl exclamations
+    local exclamations = {
+        "*paws at you*", "*purrs*", "*nuzzles*", "*ears twitch*", "*mrow*",
+        "*tilts head*", "*licks lips*", "*giggles*", "*ears flatten*", "*hisses softly*"
+    }
+    if math.random() < 0.4 then
+        local exclamation = exclamations[math.random(#exclamations)]
+        output = exclamation .. " " .. output
+    end
+
+    return output
 end
 
 font_styles.fullwidth = function(text)
@@ -129,33 +147,10 @@ end
 
 font_styles.asianstyle = function(text)
   local map = {
-    a = "卂",
-    b = "乃",
-    c = "匚",
-    d = "刀",
-    e = "乇",
-    f = "千",
-    g = "G",
-    h = "卄",
-    i = "丨",
-    j = "ﾌ",
-    k = "Ҝ",
-    l = "ㄥ",
-    m = "爪",
-    n = "几",
-    o = "ㄖ",
-    p = "卩",
-    q = "Ɋ",
-    r = "尺",
-    s = "丂",
-    t = "ㄒ",
-    u = "ㄩ",
-    v = "V",
-    w = "山",
-    x = "乂",
-    y = "ㄚ",
-    z = "乙",
-    [" "] = " "
+    a = "卂", b = "乃", c = "匚", d = "刀", e = "乇", f = "千", g = "G",
+    h = "卄", i = "丨", j = "ﾌ", k = "Ҝ", l = "ㄥ", m = "爪", n = "几",
+    o = "ㄖ", p = "卩", q = "Ɋ", r = "尺", s = "丂", t = "ㄒ", u = "ㄩ",
+    v = "V", w = "山", x = "乂", y = "ㄚ", z = "乙", [" "] = " "
   }
   return text:lower():gsub(".", function(c) return map[c] or c end)
 end
@@ -163,6 +158,13 @@ end
 -- Storage helpers
 local function save_channels(channels)
   storage:set_string("channels", minetest.serialize(channels))
+end
+
+local function trim_luanti_color_codes(text)
+    -- Pattern explanation:
+    -- \27 matches the escape character (ASCII 27)
+    -- %(c@#......%)%] matches the literal string "(c@#" followed by 6 hex digits and ")"
+    return text:gsub("\27%(c@#%x%x%x%x%x%x%)", "")
 end
 
 local function get_channels()
@@ -210,7 +212,8 @@ local function get_rank(name)
 end
 
 -- Chat handler
-local function send_to_active_channel(sender, message, channel)
+local function send_to_active_channel(sender, message, channel, is_matrix)
+  local og_msg = message
   local is_mod_sender = not minetest.get_player_by_name(sender)
   local pdata = is_mod_sender and {} or get_player_data(sender)
   local chname = channel or pdata.active
@@ -246,22 +249,47 @@ local function send_to_active_channel(sender, message, channel)
     message
   )
 
-  for _, player in ipairs(minetest.get_connected_players()) do
-    local pname = player:get_player_name()
-    local pdata2 = get_player_data(pname)
-    if pdata2.channels[chname] then
-      minetest.chat_send_player(pname, formatted)
+  if is_matrix == 2 then
+    for _, player in ipairs(minetest.get_connected_players()) do
+      local pname = player:get_player_name()
+      local pdata2 = get_player_data(pname)
+      if pdata2.channels[chname] then
+        minetest.chat_send_player(pname, formatted)
+      end
+    end
+  elseif is_matrix == 1 then
+    return formatted
+  elseif is_matrix == 0 then
+    for _, player in ipairs(minetest.get_connected_players()) do
+      local pname = player:get_player_name()
+      local pdata2 = get_player_data(pname)
+      if pdata2.channels[chname] then
+        minetest.chat_send_player(pname, og_msg)
+      end
     end
   end
 end
 
 minetest.register_on_chat_message(function(name, message)
-  send_to_active_channel(name, message)
+  local active_channel = get_player_data(name).active or "global"
 
+  -- Format the message once, for both in-game and Matrix use
+  local formatted_message = send_to_active_channel(name, message, nil, 1)
+
+  -- Send to in-game players (non-matrix)
+  send_to_active_channel(name, formatted_message, nil, 0)
+
+  -- Send to Matrix if available
+  if matrix_bridge and matrix_bridge.send_raw and formatted_message and active_channel == "global" then
+    matrix_bridge.send_raw(trim_luanti_color_codes(formatted_message))
+  end
+
+  -- Allow challenge_respond if present
   if type(challenge_respond) == "function" then
     challenge_respond(name, message)
   end
 
+  -- Prevent default handling
   return true
 end)
 
@@ -283,7 +311,7 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 function chat_channels.send(mod, channel, message)
-  send_to_active_channel(mod, message, channel)
+  send_to_active_channel(mod, message, channel,2)
 end
 
 function chat_channels.create(channel)
