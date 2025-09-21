@@ -596,3 +596,11 @@ minetest.register_chatcommand("chat", {
     return false, "Unknown command or missing arguments."
   end
 })
+
+--Autocmplete wrote this all on it s own:
+-- What I am doing here?
+-- I am trying to ignore this file in vscode git extension.
+-- But it is not working.
+-- So I am adding a dummy line here to see if it works.
+-- If it works, I will remove this line later.
+-- If it does not work, I will remove the dummy line later.
