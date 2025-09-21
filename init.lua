@@ -125,6 +125,93 @@ font_styles.catgirl = function(input)
     return output
 end
 
+font_styles.owo = function(input)
+    -- Check for nil or non-string input
+    if type(input) ~= "string" then
+        return "nuuu that's not text! >w<"
+    end
+
+    local output = input
+
+    -- Basic OwO replacements
+    output = output:gsub("r", "w")
+    output = output:gsub("l", "w")
+    output = output:gsub("R", "W")
+    output = output:gsub("L", "W")
+
+    -- Extra absurd replacements
+    output = output:gsub("ove", "uv")
+    output = output:gsub("the", "da")
+    output = output:gsub("you", "u")
+    output = output:gsub("!", "!!1! >w<")
+    output = output:gsub("?", "?? ;;w;;")
+
+    -- Random stutter for absurdity
+    local words = {}
+    for word in output:gmatch("%S+") do
+        if math.random() < 0.3 then
+            word = word:sub(1, 1) .. "-" .. word
+        end
+        table.insert(words, word)
+    end
+    output = table.concat(words, " ")
+
+    -- Add random OwO faces
+    local faces = { "owo", "UwU", ">w<", "^w^", ";;w;;", "x3", ":3", "@w@" }
+    local face = faces[math.random(#faces)]
+    output = output .. " " .. face .. " " .. face
+
+    return output
+end
+
+font_styles.catgirl = function(input)
+    -- Input validation
+    if type(input) ~= "string" then
+        return "*tilts head* Nya? That's not text, baka! >.<"
+    end
+
+    local output = input
+
+    -- Classic OwO substitutions
+    output = output:gsub("r", "w")
+    output = output:gsub("l", "w")
+    output = output:gsub("R", "W")
+    output = output:gsub("L", "W")
+    output = output:gsub("n", "ny")
+    output = output:gsub("N", "NY")
+    output = output:gsub("na", "nya")
+    output = output:gsub("nyu", "nyu~")
+    output = output:gsub("ove", "uv")
+    output = output:gsub("you", "y-you" .. (" >///<"):rep(math.random(1, 2)))
+
+    -- Add extra stuttering occasionally
+    local words = {}
+    for word in output:gmatch("%S+") do
+        if math.random() < 0.3 then
+            word = word:sub(1, 1) .. "-" .. word
+        end
+        table.insert(words, word)
+    end
+    output = table.concat(words, " ")
+
+    -- Add suffixes randomly for cuteness overload
+    local suffixes = { "nya", "nya~", "meow", "mew~", "purr~", "~" }
+    local suffix = suffixes[math.random(#suffixes)]
+    output = output .. " " .. suffix .. " " .. ("^w^"):rep(math.random(1, 3))
+
+    -- Random catgirl exclamations
+    local exclamations = {
+        "*paws at you*", "*purrs*", "*nuzzles*", "*ears twitch*", "*mrow*",
+        "*tilts head*", "*licks lips*", "*giggles*", "*ears flatten*", "*hisses softly*"
+    }
+    if math.random() < 0.4 then
+        local exclamation = exclamations[math.random(#exclamations)]
+        output = exclamation .. " " .. output
+    end
+
+    return output
+end
+
 font_styles.fullwidth = function(text)
   return text:gsub(".", function(c)
     local byte = c:byte()
