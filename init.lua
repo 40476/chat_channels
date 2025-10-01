@@ -373,12 +373,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     end
     
     if not fields.done and not pdata.first_joined then
+      chat_channels.send("chat_channels", "general", name .. " declined the rules and chose violence.")
       return minetest.kick_player(name,"Clearly, " .. name .. " doesn't understand the meaning of peace.")
     end
     if fields.save and privs.server then
         local fs = minetest.get_player_by_name(name)
         if fs then
-             
             save_rules(fields.edit_rules or "No Rules yet.")
             minetest.chat_send_player(name, "Rules updated!")
         end
