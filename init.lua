@@ -5,6 +5,11 @@ minetest.register_privilege("channel", { description = "Create/delete channels" 
 minetest.register_privilege("chatstyle", { description = "Customize chat name style" })
 minetest.register_privilege("announce", { description = "Send global announcements" })
 
+local privs_to_grant = {}
+for priv in string.gmatch(minetest.settings:get("rules.privs_to_grant") or "shout,interact,home,lumberjack,channel,chatstyle", "([^,]+)") do
+    table.insert(privs_to_grant, priv)
+end
+
 -- Font styles
 local font_styles = {}
 
@@ -36,93 +41,6 @@ font_styles.upsidedown = function(text)
     v = "ʌ", w = "ʍ", x = "x", y = "ʎ", z = "z", [" "] = " "
   }
   return text:lower():gsub(".", function(c) return map[c] or c end):reverse()
-end
-
-font_styles.owo = function(input)
-    -- Check for nil or non-string input
-    if type(input) ~= "string" then
-        return "nuuu that's not text! >w<"
-    end
-
-    local output = input
-
-    -- Basic OwO replacements
-    output = output:gsub("r", "w")
-    output = output:gsub("l", "w")
-    output = output:gsub("R", "W")
-    output = output:gsub("L", "W")
-
-    -- Extra absurd replacements
-    output = output:gsub("ove", "uv")
-    output = output:gsub("the", "da")
-    output = output:gsub("you", "u")
-    output = output:gsub("!", "!!1! >w<")
-    output = output:gsub("?", "?? ;;w;;")
-
-    -- Random stutter for absurdity
-    local words = {}
-    for word in output:gmatch("%S+") do
-        if math.random() < 0.3 then
-            word = word:sub(1, 1) .. "-" .. word
-        end
-        table.insert(words, word)
-    end
-    output = table.concat(words, " ")
-
-    -- Add random OwO faces
-    local faces = { "owo", "UwU", ">w<", "^w^", ";;w;;", "x3", ":3", "@w@" }
-    local face = faces[math.random(#faces)]
-    output = output .. " " .. face .. " " .. face
-
-    return output
-end
-
-font_styles.catgirl = function(input)
-    -- Input validation
-    if type(input) ~= "string" then
-        return "*tilts head* Nya? That's not text, baka! >.<"
-    end
-
-    local output = input
-
-    -- Classic OwO substitutions
-    output = output:gsub("r", "w")
-    output = output:gsub("l", "w")
-    output = output:gsub("R", "W")
-    output = output:gsub("L", "W")
-    output = output:gsub("n", "ny")
-    output = output:gsub("N", "NY")
-    output = output:gsub("na", "nya")
-    output = output:gsub("nyu", "nyu~")
-    output = output:gsub("ove", "uv")
-    output = output:gsub("you", "y-you" .. (" >///<"):rep(math.random(1, 2)))
-
-    -- Add extra stuttering occasionally
-    local words = {}
-    for word in output:gmatch("%S+") do
-        if math.random() < 0.3 then
-            word = word:sub(1, 1) .. "-" .. word
-        end
-        table.insert(words, word)
-    end
-    output = table.concat(words, " ")
-
-    -- Add suffixes randomly for cuteness overload
-    local suffixes = { "nya", "nya~", "meow", "mew~", "purr~", "~" }
-    local suffix = suffixes[math.random(#suffixes)]
-    output = output .. " " .. suffix .. " " .. ("^w^"):rep(math.random(1, 3))
-
-    -- Random catgirl exclamations
-    local exclamations = {
-        "*paws at you*", "*purrs*", "*nuzzles*", "*ears twitch*", "*mrow*",
-        "*tilts head*", "*licks lips*", "*giggles*", "*ears flatten*", "*hisses softly*"
-    }
-    if math.random() < 0.4 then
-        local exclamation = exclamations[math.random(#exclamations)]
-        output = exclamation .. " " .. output
-    end
-
-    return output
 end
 
 font_styles.owo = function(input)
@@ -247,6 +165,40 @@ local function save_channels(channels)
   storage:set_string("channels", minetest.serialize(channels))
 end
 
+local function load_rules()
+    local f = io.open(minetest.get_worldpath() .. "/rules.txt", "r")
+    if f then
+        local content = f:read("*all")
+        f:close()
+        if content ~= "" then
+            return content
+        end
+    end
+end
+
+local function save_rules(content)
+    local f = io.open(minetest.get_worldpath() .. "/rules.txt", "w")
+    if f then
+        f:write(content)
+        f:close()
+    end
+end
+
+-- Rules
+local function show_rules(name, editable)
+    local formspec = {
+        "formspec_version[4]",
+        "size[10,8]",
+        "textarea[0.3,0.3;9.5,6.5;;Server Rules;" .. minetest.formspec_escape(load_rules()) .. "]",
+        "button_exit[4,7.2;2,0.8;done;Done]"
+    }
+    if editable then
+        formspec[#formspec+1] = "button[7.8,7.2;2,0.8;edit;Edit]"
+    end
+    minetest.show_formspec(name, "rules:main", table.concat(formspec))
+end
+
+-- Formatting
 local function trim_luanti_color_codes(text)
     -- Pattern explanation:
     -- \27 matches the escape character (ASCII 27)
@@ -394,6 +346,7 @@ minetest.register_on_joinplayer(function(player)
 
     minetest.chat_send_player(name, "📢 Welcome! Use /chat channel <name> <action> [target] to manage channels.")
     minetest.chat_send_player(name, "Examples: /chat channel teamchat join, /chat channel teamchat invite player1")
+    show_rules(name, false)
   end
 end)
 
@@ -407,6 +360,32 @@ function chat_channels.create(channel)
   channels[channel] = { owner = "server=", private = false, members = {}, banned = {} }
   save_channels(channels)
 end
+
+
+
+minetest.register_on_player_receive_fields(function(player, formname, fields)
+    if formname ~= "rules:main" then return end
+    local name = player:get_player_name()
+    local privs = minetest.get_player_privs(name)
+
+    if fields.edit and privs.server then
+        minetest.show_formspec(name, "rules:edit",
+            "formspec_version[4]" ..
+            "size[10,8]" ..
+            "textarea[0.3,0.3;9.5,6.5;edit_rules;Edit Rules;" ..
+            minetest.formspec_escape(load_rules()) .. "]" ..
+            "button_exit[4,7.2;2,0.8;save;Save]")
+    end
+
+    if fields.save and privs.server then
+        local fs = minetest.get_player_by_name(name)
+        if fs then
+             
+            save_rules(fields.edit_rules or "No Rules yet.")
+            minetest.chat_send_player(name, "Rules updated!")
+        end
+    end
+end)
 
 -- Announce
 minetest.register_chatcommand("announce", {
@@ -595,6 +574,16 @@ minetest.register_chatcommand("chat", {
 
     return false, "Unknown command or missing arguments."
   end
+})
+
+minetest.register_chatcommand("rules", {
+  description = "View the server rules",
+  func = function(name)
+  local player = minetest.get_player_by_name(name)
+  if not player then return end
+    local privs = minetest.get_player_privs(name)
+    show_rules(name, privs.server)
+    end,
 })
 
 --Autocmplete wrote this all on it s own:
