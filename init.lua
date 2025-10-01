@@ -338,12 +338,6 @@ minetest.register_on_joinplayer(function(player)
   local pdata = get_player_data(name)
 
   if not pdata.first_joined then
-    pdata.channels["global"] = true
-    pdata.channels['challenges'] = true
-    pdata.active = "global"
-    pdata.first_joined = true
-    save_player_data(name, pdata)
-
     minetest.chat_send_player(name, "📢 Welcome! Use /chat channel <name> <action> [target] to manage channels.")
     minetest.chat_send_player(name, "Examples: /chat channel teamchat join, /chat channel teamchat invite player1")
     show_rules(name, false)
@@ -367,7 +361,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     if formname ~= "rules:main" then return end
     local name = player:get_player_name()
     local privs = minetest.get_player_privs(name)
-
+    local pdata = get_player_data(name)
+    
     if fields.edit and privs.server then
         minetest.show_formspec(name, "rules:edit",
             "formspec_version[4]" ..
@@ -376,7 +371,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             minetest.formspec_escape(load_rules()) .. "]" ..
             "button_exit[4,7.2;2,0.8;save;Save]")
     end
-
+    
+    if not fields.done and not pdata.first_joined then
+      return minetest.kick_player(name,"Clearly, " .. name .. " doesn't understand the meaning of peace.")
+    end
     if fields.save and privs.server then
         local fs = minetest.get_player_by_name(name)
         if fs then
@@ -384,6 +382,17 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             save_rules(fields.edit_rules or "No Rules yet.")
             minetest.chat_send_player(name, "Rules updated!")
         end
+    elseif fields.done and not privs.server and pdata.first_joined then
+      for i, v in pairs(privs_to_grant) do
+        privs[v]=true
+      end
+      minetest.set_player_privs(name, privs)
+      pdata.channels["global"] = true
+      pdata.channels['challenges'] = true
+      pdata.active = "global"
+      pdata.first_joined = true
+      save_player_data(name, pdata)
+      chat_channels.send("chat_channels", "general", name .. " accepted the rules and has been granted privileges!")
     end
 end)
 
@@ -571,7 +580,6 @@ minetest.register_chatcommand("chat", {
         end
       end
     end
-
     return false, "Unknown command or missing arguments."
   end
 })
