@@ -207,6 +207,16 @@ local function trim_luanti_color_codes(text)
     return text:gsub("\27%(c@#%x%x%x%x%x%x%)", "")
 end
 
+local function sanitizeInput(input)
+  local sanitized = input
+    :gsub("&", "&amp;")
+    :gsub("<", "&lt;")
+    :gsub(">", "&gt;")
+    :gsub('"', "&quot;")
+    :gsub("'", "&#39;")
+  return sanitized
+end
+
 local function get_channels()
   local raw = storage:get_string("channels")
   local channels = raw ~= "" and minetest.deserialize(raw) or {}
@@ -231,7 +241,7 @@ local function get_player_data(name)
   data.active = data.active or nil
   data.font = data.font or nil
   data.first_joined = data.first_joined or false
-  return dataend
+  return data
 end
 
 local function save_player_data(name, data)
@@ -293,13 +303,13 @@ local function send_to_active_channel(sender, message, channel, is_matrix)
   
   if is_matrix == 2 or is_matrix == 4 then
     for _, player in ipairs(minetest.get_connected_players()) do
-      error(dump(minetest.get_connected_players()))
       local pname = player:get_player_name()
       local pdata2 = get_player_data(pname)
       if pdata2.channels[chname] then
         minetest.chat_send_player(pname, formatted)
         if is_matrix == 4 then
-          return formatted
+          -- error(formatted)
+          minetest.after(1, matrix_bridge.send_raw, sanitizeInput(trim_luanti_color_codes(formatted)))
         end
       end
     end
@@ -327,7 +337,7 @@ minetest.register_on_chat_message(function(name, message)
 
   -- Send to Matrix if available
   if matrix_bridge and matrix_bridge.send_raw and formatted_message and active_channel == "global" then
-    matrix_bridge.send_raw(trim_luanti_color_codes(formatted_message))
+    matrix_bridge.send_raw(sanitizeInput(trim_luanti_color_codes(formatted_message)))
   end
 
   -- Allow challenge_respond if present
@@ -343,17 +353,23 @@ end)
 minetest.register_on_joinplayer(function(player)
   local name = player:get_player_name()
   local pdata = get_player_data(name)
-
   if not pdata or not pdata.first_joined then
-    save_player_data(name, pdata)
+      pdata.channels["global"] = true
+      pdata.channels['challenges'] = true
+      pdata.active = "global"
+      save_player_data(name, pdata)
     minetest.chat_send_player(name, "📢 Welcome! Use /chat channel <name> <action> [target] to manage channels.")
     minetest.chat_send_player(name, "Examples: /chat channel teamchat join, /chat channel teamchat invite player1")
     show_rules(name, false)
   end
 end)
 
-function chat_channels.send(mod, channel, message)
-  send_to_active_channel(mod, message, channel,2)
+function chat_channels.send(mod, channel, message, mode)
+  if mode == 4 then
+    return send_to_active_channel(mod, message, channel, 4)
+  else
+    send_to_active_channel(mod, message, channel, 2)
+  end
 end
 
 function chat_channels.create(channel)
@@ -395,9 +411,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         privs[v]=true
       end
       minetest.set_player_privs(name, privs)
-      pdata.channels["global"] = true
-      pdata.channels['challenges'] = true
-      pdata.active = "global"
       pdata.first_joined = true
       save_player_data(name, pdata)
       chat_channels.send("chat_channels", "general", name .. " accepted the rules and has been granted privileges!")
