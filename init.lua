@@ -171,9 +171,10 @@ local function load_rules()
         local content = f:read("*all")
         f:close()
         if content ~= "" then
-            return content
+            return content or "No Rules yet. ;p"
         end
     end
+    return "No Rules yet. ;p"
 end
 
 local function save_rules(content)
@@ -230,7 +231,7 @@ local function get_player_data(name)
   data.active = data.active or nil
   data.font = data.font or nil
   data.first_joined = data.first_joined or false
-  return data
+  return dataend
 end
 
 local function save_player_data(name, data)
@@ -255,6 +256,7 @@ local function send_to_active_channel(sender, message, channel, is_matrix)
   local og_msg = message
   local is_mod_sender = not minetest.get_player_by_name(sender)
   local pdata = is_mod_sender and {} or get_player_data(sender)
+  local is_matrix = is_matrix or 0 -- 0=ingame, 1=return formatted, 2=send to ingame+return, 4=send to ingame+return+matrix
   local chname = channel or pdata.active
   if not chname then
     print("[chat] No channel specified or active for sender:", sender)
@@ -288,12 +290,17 @@ local function send_to_active_channel(sender, message, channel, is_matrix)
     message
   )
 
-  if is_matrix == 2 then
+  
+  if is_matrix == 2 or is_matrix == 4 then
     for _, player in ipairs(minetest.get_connected_players()) do
+      error(dump(minetest.get_connected_players()))
       local pname = player:get_player_name()
       local pdata2 = get_player_data(pname)
       if pdata2.channels[chname] then
         minetest.chat_send_player(pname, formatted)
+        if is_matrix == 4 then
+          return formatted
+        end
       end
     end
   elseif is_matrix == 1 then
@@ -337,7 +344,8 @@ minetest.register_on_joinplayer(function(player)
   local name = player:get_player_name()
   local pdata = get_player_data(name)
 
-  if not pdata.first_joined then
+  if not pdata or not pdata.first_joined then
+    save_player_data(name, pdata)
     minetest.chat_send_player(name, "📢 Welcome! Use /chat channel <name> <action> [target] to manage channels.")
     minetest.chat_send_player(name, "Examples: /chat channel teamchat join, /chat channel teamchat invite player1")
     show_rules(name, false)
@@ -382,7 +390,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             save_rules(fields.edit_rules or "No Rules yet.")
             minetest.chat_send_player(name, "Rules updated!")
         end
-    elseif fields.done and not privs.server and pdata.first_joined then
+    elseif fields.done and not privs.server then
       for i, v in pairs(privs_to_grant) do
         privs[v]=true
       end
