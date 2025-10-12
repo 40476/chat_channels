@@ -204,7 +204,7 @@ local function trim_luanti_color_codes(text)
     -- Pattern explanation:
     -- \27 matches the escape character (ASCII 27)
     -- %(c@#......%)%] matches the literal string "(c@#" followed by 6 hex digits and ")"
-    return text:gsub("\27%(c@#%x%x%x%x%x%x%)", "")
+    return text:gsub("\27%(c@#%x%x%x%x%x%x%)", ""):gsub("\27%(c@#%x%x%x%)", "")
 end
 
 local function sanitizeInput(input)
