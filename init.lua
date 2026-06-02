@@ -1,5 +1,4 @@
 local storage = minetest.get_mod_storage()
-local utf8 = require("utf8") or utf8 or {}
 
 chat_channels = {}
 -- Privileges
@@ -14,10 +13,14 @@ end
 
 
 -- Safe UTF-8 wrapper for Luanti/Minetest environments
-local utf8_char = (utf8 and utf8.char) or function(cp)
-    if cp < 128 then return string.char(cp) end
-    if cp < 2048 then return string.char(192 + math.floor(cp / 64), 128 + (cp % 64)) end
-    return string.char(224 + math.floor(cp / 4096), 128 + (math.floor(cp / 64) % 64), 128 + (cp % 64))
+local function safe_utf8_char(cp)
+    if cp < 128 then 
+        return string.char(cp) 
+    elseif cp < 2048 then 
+        return string.char(192 + math.floor(cp / 64), 128 + (cp % 64)) 
+    else
+        return string.char(224 + math.floor(cp / 4096), 128 + (math.floor(cp / 64) % 64), 128 + (cp % 64))
+    end
 end
 
 -- Font styles
@@ -144,7 +147,7 @@ font_styles.fullwidth = function(text)
   return text:gsub(".", function(c)
     local byte = c:byte()
     if byte >= 33 and byte <= 126 then
-      return utf8_char(0xFF00 + byte - 0x20) -- <-- Changed to utf8_char
+      return safe_utf8_char(0xFF00 + byte - 0x20) -- <-- Updated here!
     else
       return c
     end
