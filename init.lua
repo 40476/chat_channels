@@ -12,6 +12,14 @@ for priv in string.gmatch(minetest.settings:get("rules.privs_to_grant") or "shou
     table.insert(privs_to_grant, priv)
 end
 
+
+-- Safe UTF-8 wrapper for Luanti/Minetest environments
+local utf8_char = (utf8 and utf8.char) or function(cp)
+    if cp < 128 then return string.char(cp) end
+    if cp < 2048 then return string.char(192 + math.floor(cp / 64), 128 + (cp % 64)) end
+    return string.char(224 + math.floor(cp / 4096), 128 + (math.floor(cp / 64) % 64), 128 + (cp % 64))
+end
+
 -- Font styles
 local font_styles = {}
 
@@ -136,7 +144,7 @@ font_styles.fullwidth = function(text)
   return text:gsub(".", function(c)
     local byte = c:byte()
     if byte >= 33 and byte <= 126 then
-      return utf8.char(0xFF00 + byte - 0x20)
+      return utf8_char(0xFF00 + byte - 0x20) -- <-- Changed to utf8_char
     else
       return c
     end
