@@ -46,15 +46,15 @@ font_styles.smallcaps = function(text)
   return text:lower():gsub(".", function(c) return map[c] or c end)
 end
 
-font_styles.upsidedown = function(text)
-  local map = {
-    a = "ɐ", b = "q", c = "ɔ", d = "p", e = "ǝ", f = "ɟ", g = "ƃ",
-    h = "ɥ",i = "ᴉ", j = "ɾ", k = "ʞ", l = "ʃ", m = "ɯ", n = "u",
-    o = "o", p = "d", q = "b", r = "ɹ", s = "s", t = "ʇ", u = "n",
-    v = "ʌ", w = "ʍ", x = "x", y = "ʎ", z = "z", [" "] = " "
-  }
-  return text:lower():gsub(".", function(c) return map[c] or c end):reverse()
-end
+-- font_styles.upsidedown = function(text)
+--   local map = {
+--     a = "ɐ", b = "q", c = "ɔ", d = "p", e = "ǝ", f = "ɟ", g = "ƃ",
+--     h = "ɥ",i = "ᴉ", j = "ɾ", k = "ʞ", l = "ʃ", m = "ɯ", n = "u",
+--     o = "o", p = "d", q = "b", r = "ɹ", s = "s", t = "ʇ", u = "n",
+--     v = "ʌ", w = "ʍ", x = "x", y = "ʎ", z = "z", [" "] = " "
+--   }
+--   return text:lower():gsub(".", function(c) return map[c] or c end):reverse()
+-- end
 
 font_styles.owo = function(input)
     -- Check for nil or non-string input
@@ -156,11 +156,6 @@ end
 
 font_styles.strikethrough = function(text)
   return text:gsub(".", function(c) return c .. "̶" end)
-end
-
-font_styles.boldunicode = function(text)
-  local map = font_styles.smallcaps
-  return map(text:upper())
 end
 
 font_styles.asianstyle = function(text)
