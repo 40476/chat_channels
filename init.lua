@@ -1,4 +1,6 @@
 local storage = minetest.get_mod_storage()
+local utf8 = require("utf8") or utf8 or {}
+
 chat_channels = {}
 -- Privileges
 minetest.register_privilege("channel", { description = "Create/delete channels" })
